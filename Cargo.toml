@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 log = "0.4"
-env_logger = "0.9.0"
+fast_log = {version = "1.4" , features = ["lz4","zip","gzip"]}
 tokio = { version = "1.17.0", features = ["full"] }
 actix-web = "4"
 dotenvy = "0.15.1"

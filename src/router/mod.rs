@@ -1,4 +1,4 @@
-use actix_web::{get, post, HttpResponse, Responder, web};
+use actix_web::{get, HttpResponse, post, Responder, web};
 
 // function that will be called on new Application to configure routes for this module
 pub fn init(cfg: &mut web::ServiceConfig) {

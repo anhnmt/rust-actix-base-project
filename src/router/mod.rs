@@ -21,3 +21,8 @@ async fn echo(req_body: String) -> impl Responder {
 async fn manual_hello() -> impl Responder {
     HttpResponse::Ok().body("Hey there!")
 }
+
+#[get("/users")]
+async fn users() -> impl Responder {
+    HttpResponse::Ok().body("User!")
+}

@@ -1,31 +1,23 @@
-extern crate dotenvy;
-
-use std::io;
+use std::{env, io};
 
 use actix_web::{App, HttpResponse, HttpServer, Responder, web};
 use actix_web::middleware::{Logger, NormalizePath};
-use dotenvy::dotenv;
-use fast_log::config::Config;
-use fast_log::consts::LogSize;
-use fast_log::plugin::file_split::RollingType;
-use fast_log::plugin::packer::LogPacker;
 use log::info;
+
+use repo::Repo;
+
+use crate::logger::new_logger;
 
 // External modules reference
 mod router;
+mod repo;
+mod logger;
 
-#[tokio::main]
+#[tokio::main] // or #[actix_web::main]
 async fn main() -> io::Result<()> {
-    dotenv().ok();
-    fast_log::init(Config::new()
-        .console()
-        .file_split("logs/",
-                    LogSize::MB(1),
-                    RollingType::All,
-                    LogPacker {})
-    ).unwrap();
-
-    info!("starting HTTP server at http://localhost:8080");
+    new_logger();
+    let app_port = env::var("APP_PORT").expect("APP_PORT env not set.");
+    info!("starting HTTP server at http://localhost:{}", app_port);
 
     HttpServer::new(|| {
         let logger = Logger::new(r#"%a "%r" %s %b "%{Referer}i" "%{User-Agent}i" %T %D"#);
@@ -33,14 +25,17 @@ async fn main() -> io::Result<()> {
         App::new()
             .wrap(NormalizePath::new(Default::default()))
             .wrap(logger)
+            // .app_data(AppState::new())
             .configure(router::init)
             .default_service(web::route().to(not_found))
     })
-        .bind(("0.0.0.0", 8080))?
+        .bind(&format!("0.0.0.0:{}", app_port))
+        .expect(&format!("Can not bind to http://localhost:{}", app_port))
         .run()
         .await
 }
 
+/// 404 Not Found
 async fn not_found() -> impl Responder {
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")

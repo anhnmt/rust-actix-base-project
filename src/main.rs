@@ -4,16 +4,15 @@ use actix_web::{App, HttpResponse, HttpServer, Responder, web};
 use actix_web::middleware::{Logger, NormalizePath};
 use log::info;
 
-use repo::Repo;
-
 use crate::logger::new_logger;
 
 // External modules reference
 mod router;
 mod repo;
 mod logger;
+mod model;
 
-#[tokio::main] // or #[actix_web::main]
+#[actix_web::main] // or #[tokio::main]
 async fn main() -> io::Result<()> {
     new_logger();
     let app_port = env::var("APP_PORT").expect("APP_PORT env not set.");

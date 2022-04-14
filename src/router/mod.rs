@@ -1,10 +1,15 @@
 use actix_web::{get, HttpResponse, post, Responder, web};
 
+use user::users;
+
+pub mod user;
+
 // function that will be called on new Application to configure routes for this module
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(hello);
     cfg.service(echo);
     cfg.service(manual_hello);
+    cfg.service(users);
 }
 
 #[get("/")]
@@ -20,9 +25,4 @@ async fn echo(req_body: String) -> impl Responder {
 #[get("/hey")]
 async fn manual_hello() -> impl Responder {
     HttpResponse::Ok().body("Hey there!")
-}
-
-#[get("/users")]
-async fn users() -> impl Responder {
-    HttpResponse::Ok().body("User!")
 }

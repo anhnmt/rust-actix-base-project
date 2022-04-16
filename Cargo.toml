@@ -10,6 +10,7 @@ log = "0.4"
 fast_log = {version = "1.4" , features = ["lz4","zip","gzip"]}
 tokio = { version = "1.17.0", features = ["full"] }
 actix-web = "4"
+actix-cors = "0.6"
 dotenvy = "0.15.1"
 mongodb = "2.1"
 bson = { version = "2", features = ["chrono-0_4"] }

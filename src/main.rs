@@ -1,16 +1,16 @@
 use std::{env, io};
 
-use actix_web::{App, HttpResponse, HttpServer, Responder, web};
+use actix_cors::Cors;
 use actix_web::middleware::{Logger, NormalizePath};
+use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use log::info;
 
 use crate::logger::new_logger;
 
 // External modules reference
-mod router;
-mod repo;
 mod logger;
-mod model;
+mod repo;
+mod router;
 
 #[actix_web::main] // or #[tokio::main]
 async fn main() -> io::Result<()> {
@@ -18,20 +18,26 @@ async fn main() -> io::Result<()> {
     let app_port = env::var("APP_PORT").expect("APP_PORT env not set.");
     info!("starting HTTP server at http://localhost:{}", app_port);
 
-    HttpServer::new(|| {
+    HttpServer::new(move || {
         let logger = Logger::new(r#"%a "%r" %s %b "%{Referer}i" "%{User-Agent}i" %T %D"#);
+        let cors = Cors::default()
+            .allowed_origin("http://localhost:8080")
+            .allowed_methods(vec!["GET", "POST", "PUT", "PATCH", "DELETE"])
+            .allowed_header("*")
+            .supports_credentials()
+            .max_age(3600);
 
         App::new()
             .wrap(NormalizePath::new(Default::default()))
             .wrap(logger)
-            // .app_data(AppState::new())
+            .wrap(cors)
             .configure(router::init)
             .default_service(web::route().to(not_found))
     })
-        .bind(&format!("0.0.0.0:{}", app_port))
-        .expect(&format!("Can not bind to http://localhost:{}", app_port))
-        .run()
-        .await
+    .bind(&format!("0.0.0.0:{}", app_port))
+    .expect(&format!("Can not bind to http://localhost:{}", app_port))
+    .run()
+    .await
 }
 
 /// 404 Not Found

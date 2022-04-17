@@ -1362,7 +1362,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rust-api-base-project"
+name = "rust-actix-base-project"
 version = "0.1.0"
 dependencies = [
  "actix-cors",

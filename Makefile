@@ -1,4 +1,4 @@
-APP_NAME=rust-api-base-project
+APP_NAME=rust-actix-base-project
 APP_VERSION=latest
 DOCKER_REGISTRY=registry.gitlab.com/xdorro/registry
 MAIN_DIR=./cmd

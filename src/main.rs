@@ -3,11 +3,14 @@ extern crate dotenvy;
 use std::{env, io};
 
 use actix_cors::Cors;
+use actix_web::{App, HttpResponse, HttpServer, Responder, web};
 use actix_web::middleware::{Logger, NormalizePath};
-use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use dotenvy::dotenv;
 use log::info;
+use tracing::instrument::WithSubscriber;
 use tracing_actix_web::TracingLogger;
+use tracing_subscriber::fmt::time;
+use tracing_subscriber::util::SubscriberInitExt;
 
 // External modules reference
 mod router;
@@ -15,7 +18,18 @@ mod router;
 #[actix_web::main] // or #[tokio::main]
 async fn main() -> io::Result<()> {
     dotenv().ok();
-    tracing_subscriber::fmt::init();
+
+    // Initialize tracing
+    let mut subscriber = tracing_subscriber::fmt()
+        .with_timer(time::ChronoUtc::rfc3339());
+
+    // App mode
+    // let app_dev = env::var("APP_DEV").is_ok();
+    // if !app_dev {
+    //     subscriber = subscriber.json();
+    // }
+
+    subscriber.finish().init();
 
     let app_port = env::var("APP_PORT").expect("APP_PORT env not set.");
     info!("Starting HTTP server at http://localhost:{}", app_port);
@@ -38,9 +52,9 @@ async fn main() -> io::Result<()> {
             .configure(router::init)
             .default_service(web::route().to(not_found))
     })
-    .bind(&format!("0.0.0.0:{}", app_port))?
-    .run()
-    .await
+        .bind(&format!("0.0.0.0:{}", app_port))?
+        .run()
+        .await
 }
 
 /// 404 Not Found

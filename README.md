@@ -1,1 +1,1 @@
-# rust-api-base-project
+# rust-actix-base-project

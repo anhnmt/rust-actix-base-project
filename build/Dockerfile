@@ -1,4 +1,4 @@
-FROM rust:1.60 as build
+FROM rust:slim-buster as build
 
 # create a new empty shell project
 RUN USER=root cargo new --bin app
@@ -22,7 +22,7 @@ FROM debian:buster-slim
 WORKDIR /root/
 
 # copy the build artifact from the build stage
-COPY --from=build /app/target/release/rust-api-base .
+COPY --from=build /app/target/release/rust-api-base-project .
 
 # set the startup command to run your binary
-ENTRYPOINT ["./rust-api-base"]
+ENTRYPOINT ["./rust-api-base-project"]

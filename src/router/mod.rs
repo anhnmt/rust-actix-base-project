@@ -1,4 +1,5 @@
-use actix_web::{get, HttpResponse, post, Responder, web};
+use actix_web::{get, post, web, HttpResponse, Responder};
+use tracing_actix_web::RequestId;
 
 use user::users;
 
@@ -23,6 +24,6 @@ async fn echo(req_body: String) -> impl Responder {
 }
 
 #[get("/hey")]
-async fn manual_hello() -> impl Responder {
-    HttpResponse::Ok().body("Hey there!")
+async fn manual_hello(request_id: RequestId) -> impl Responder {
+    HttpResponse::Ok().body(request_id.to_string())
 }

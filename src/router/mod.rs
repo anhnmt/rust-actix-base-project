@@ -13,6 +13,13 @@ pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(users);
 }
 
+/// 404 Not Found
+pub async fn not_found() -> impl Responder {
+    HttpResponse::Ok()
+        .content_type("text/html; charset=utf-8")
+        .body("<h1>Error 404</h1>")
+}
+
 #[get("/")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")

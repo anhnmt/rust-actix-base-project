@@ -9,18 +9,16 @@ use actix_web::web::Data;
 use bson::doc;
 use dotenvy::dotenv;
 use log::info;
-use mongodb::{Client, Database};
+use mongodb::Client;
 use mongodb::options::ClientOptions;
 use tracing_actix_web::TracingLogger;
+
+use crate::models::AppState;
 
 // External modules reference
 mod router;
 mod logger;
-
-struct AppState {
-    pub db: Database,
-    pub client: Client,
-}
+mod models;
 
 #[actix_web::main] // or #[tokio::main]
 async fn main() -> io::Result<()> {
@@ -45,7 +43,6 @@ async fn main() -> io::Result<()> {
     info!("Connected successfully.");
 
     HttpServer::new(move || {
-        let logger = Logger::new(r#"%a "%r" %s %b "%{Referer}i" "%{User-Agent}i" %T %D"#);
         let tracing = TracingLogger::default();
         let cors = Cors::default()
             .allow_any_origin()
@@ -60,10 +57,10 @@ async fn main() -> io::Result<()> {
                 client: client.clone(),
             }))
             .wrap(NormalizePath::new(Default::default()))
-            .wrap(tracing)
-            .wrap(logger)
-            .wrap(cors)
+            .wrap(Logger::default())
             .wrap(Compress::default())
+            .wrap(tracing)
+            .wrap(cors)
             .configure(router::init)
             .default_service(web::route().to(router::not_found))
     })

@@ -1,7 +1,8 @@
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{get, HttpResponse, post, Responder, web};
 use tracing_actix_web::RequestId;
 
 use user::users;
+use crate::models::Status;
 
 pub mod user;
 
@@ -22,7 +23,9 @@ pub async fn not_found() -> impl Responder {
 
 #[get("/")]
 async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
+    HttpResponse::Ok().json(Status {
+        status: "Hello world!".to_string(),
+    })
 }
 
 #[post("/echo")]

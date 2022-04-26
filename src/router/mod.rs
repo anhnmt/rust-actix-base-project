@@ -1,7 +1,8 @@
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{get, HttpResponse, post, Responder, web};
 use tracing_actix_web::RequestId;
 
 use user::users;
+use crate::models::Status;
 
 pub mod user;
 
@@ -13,9 +14,18 @@ pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(users);
 }
 
+/// 404 Not Found
+pub async fn not_found() -> impl Responder {
+    HttpResponse::Ok()
+        .content_type("text/html; charset=utf-8")
+        .body("<h1>Error 404</h1>")
+}
+
 #[get("/")]
 async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
+    HttpResponse::Ok().json(Status {
+        status: "Hello world!".to_string(),
+    })
 }
 
 #[post("/echo")]

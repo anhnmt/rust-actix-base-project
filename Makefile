@@ -4,7 +4,7 @@ DOCKER_REGISTRY=registry.gitlab.com/xdorro/registry
 MAIN_DIR=./cmd
 
 docker.build:
-	docker build -f ./build/Dockerfile -t $(DOCKER_REGISTRY)/$(APP_NAME):$(APP_VERSION) .
+	docker build -f ./Dockerfile -t $(DOCKER_REGISTRY)/$(APP_NAME):$(APP_VERSION) .
 
 docker.push:
 	docker push $(DOCKER_REGISTRY)/$(APP_NAME):$(APP_VERSION)

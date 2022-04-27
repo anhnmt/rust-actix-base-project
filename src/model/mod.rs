@@ -1,5 +1,6 @@
 use mongodb::{Client, Database};
 use serde::Serialize;
+pub mod user;
 
 #[derive(Clone)]
 pub struct AppState {

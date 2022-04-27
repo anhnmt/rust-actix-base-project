@@ -1,10 +1,10 @@
 extern crate dotenvy;
 
-use std::{env, io};
+use std::env;
 
 use actix_cors::Cors;
 use actix_web::{App, HttpServer, web};
-use actix_web::middleware::{Compress, Logger, NormalizePath};
+use actix_web::middleware::{Compat, Compress, Logger, NormalizePath};
 use actix_web::web::Data;
 use bson::doc;
 use dotenvy::dotenv;
@@ -13,15 +13,17 @@ use mongodb::Client;
 use mongodb::options::ClientOptions;
 use tracing_actix_web::TracingLogger;
 
-use crate::models::AppState;
+use crate::model::AppState;
 
 // External modules reference
-mod router;
 mod logger;
-mod models;
+mod model;
+mod service;
+mod utils;
+mod router;
 
-#[actix_web::main] // or #[tokio::main]
-async fn main() -> io::Result<()> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
     logger::init();
 
@@ -30,8 +32,8 @@ async fn main() -> io::Result<()> {
 
     // A Client is needed to connect to MongoDB:
     let client_uri = env::var("DB_URL").expect("DB_URL env not set.");
-    let options = ClientOptions::parse(&client_uri).await.unwrap();
-    let client = Client::with_options(options).unwrap();
+    let options = ClientOptions::parse(&client_uri).await?;
+    let client = Client::with_options(options)?;
     let db_name = env::var("DB_NAME").expect("DB_NAME env not set.");
     let db = client.database(&db_name);
 
@@ -39,11 +41,10 @@ async fn main() -> io::Result<()> {
     client
         .database("admin")
         .run_command(doc! {"ping": 1}, None)
-        .await.unwrap();
+        .await?;
     info!("Connected successfully.");
 
     HttpServer::new(move || {
-        let tracing = TracingLogger::default();
         let cors = Cors::default()
             .allow_any_origin()
             .allow_any_header()
@@ -59,12 +60,14 @@ async fn main() -> io::Result<()> {
             .wrap(NormalizePath::new(Default::default()))
             .wrap(Logger::default())
             .wrap(Compress::default())
-            .wrap(tracing)
+            .wrap(Compat::new(TracingLogger::default()))
             .wrap(cors)
             .configure(router::init)
             .default_service(web::route().to(router::not_found))
     })
         .bind(&format!("0.0.0.0:{}", app_port))?
         .run()
-        .await
+        .await?;
+
+    Ok(())
 }

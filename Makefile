@@ -11,7 +11,7 @@ docker.push:
 
 docker.run:
 	docker rm -f $(APP_NAME)
-	docker run -dp 8080:8080 --name $(APP_NAME) $(DOCKER_REGISTRY)/$(APP_NAME):$(APP_VERSION)
+	docker-compose -f ./docker-compose.yml up -d --force-recreate
 
 docker.dev: docker.build docker.push
 
